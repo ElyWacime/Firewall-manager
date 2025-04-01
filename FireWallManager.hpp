@@ -1,5 +1,6 @@
 #pragma once
 
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -7,7 +8,7 @@
 class FirewallManager {
 private:
   std::vector<std::string> blockedIPs;
-  std::vector<int> blokedPorts;
+  std::vector<std::string> blockedPorts;
 
 public:
   // constractor
@@ -15,7 +16,6 @@ public:
   ~FirewallManager();
   // configuration functions
   void addRule(std::string ip);
-  void addRule(int port);
   void removeRule(std::string ip);
   void removeRule(int port);
   void listRules() const;
@@ -32,6 +32,11 @@ public:
 
   // getters
   std::vector<std::string> getBlockedIPs() { return blockedIPs; }
-  std::vector<int> getBlockedPorts() { return blokedPorts; }
+  std::vector<std::string> getBlockedPorts() { return blockedPorts; }
+
+  class RuleAlreadyExists : public std::exception {
+  public:
+    virtual const char *what() const throw();
+  };
 };
 std::ostream &operator<<(std::ostream &out, const FirewallManager &obj);
