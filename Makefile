@@ -1,6 +1,6 @@
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g
-CXXFILES = FireWallManager.cpp  main.cpp
+CXXFILES = FireWallManager.cpp  tests.cpp
 CXXOBJ = $(CXXFILES:.cpp=.o)
 program = app
 
