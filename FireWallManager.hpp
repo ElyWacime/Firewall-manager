@@ -19,22 +19,24 @@ public:
   void removeRule(std::string ip);
   void removeRule(int port);
   void listRules() const;
-  bool isBlocked(std::string ip);
-  bool isBlocked(int port);
+  bool isBlockedIP(std::string ip);
+  bool isBlockedPort(std::string port);
   void loadRulesFromFile();
   void saveRulesToFile();
 
   // overloading operator
-  FirewallManager &operator+(const std::string ip);
-  FirewallManager &operator+(const int port);
-  FirewallManager &operator-(const std::string ip);
-  FirewallManager &operator-(const int port);
+  FirewallManager &operator+(const std::string rule);
+  FirewallManager &operator-(const std::string rule);
 
   // getters
   std::vector<std::string> getBlockedIPs() { return blockedIPs; }
   std::vector<std::string> getBlockedPorts() { return blockedPorts; }
 
   class RuleAlreadyExists : public std::exception {
+  public:
+    virtual const char *what() const throw();
+  };
+  class RuleDoNotExist : public std::exception {
   public:
     virtual const char *what() const throw();
   };
