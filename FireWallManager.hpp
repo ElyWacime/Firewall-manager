@@ -24,6 +24,9 @@ public:
   void loadRulesFromFile();
   void saveRulesToFile();
 
+  // execute
+  void executeRules() const;
+
   // overloading operator
   FirewallManager &operator+(const std::string rule);
   FirewallManager &operator-(const std::string rule);
@@ -42,3 +45,4 @@ public:
   };
 };
 std::ostream &operator<<(std::ostream &out, const FirewallManager &obj);
+void undoChanges(const std::string &rulesFile);
