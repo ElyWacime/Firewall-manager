@@ -9,7 +9,13 @@
 #include <vector>
 
 // constractor / distractor
-FirewallManager::FirewallManager() {
+FirewallManager::FirewallManager() : rulesFilePath("rules.txt") {
+  std::cout << "constractor called;" << std::endl;
+  loadRulesFromFile();
+}
+
+FirewallManager::FirewallManager(std::string filePath)
+    : rulesFilePath(filePath) {
   std::cout << "constractor called;" << std::endl;
   loadRulesFromFile();
 }
@@ -17,13 +23,12 @@ FirewallManager::FirewallManager() {
 FirewallManager::~FirewallManager() {
   std::cout << "Destractor called" << std::endl;
   saveRulesToFile();
-  executeRules();
 }
 
 // configuration functions
 void FirewallManager::loadRulesFromFile() {
   std::string currentRule;
-  std::ifstream rulesFiles("rules.txt");
+  std::ifstream rulesFiles(this->rulesFilePath.c_str());
   while (getline(rulesFiles, currentRule)) {
     if (currentRule.find(".") != std::string::npos)
       this->blockedIPs.push_back(currentRule);
@@ -35,7 +40,7 @@ void FirewallManager::loadRulesFromFile() {
 
 void FirewallManager::saveRulesToFile() {
   std::fstream rulesFile;
-  rulesFile.open("rules.txt", std::ios::out);
+  rulesFile.open(this->rulesFilePath.c_str(), std::ios::out);
   if (rulesFile.is_open()) {
     for (std::vector<std::string>::iterator it = this->blockedIPs.begin();
          it != this->blockedIPs.end(); ++it)
@@ -107,30 +112,6 @@ void FirewallManager::listRules() const {
   std::cout << std::endl;
 }
 
-// execute
-void FirewallManager::executeRules() const {
-  std::fstream rulesFile;
-  std::string currentRule;
-  rulesFile.open("rules.txt", std::ios::in);
-  if (!rulesFile.is_open()) {
-    std::cerr << "can't open rules.txt";
-  }
-  while (getline(rulesFile, currentRule)) {
-    if (currentRule.find('.') != std::string::npos) {
-      std::cout << "Blocking IP: " << currentRule << std::endl;
-      std::string command =
-          "sudo iptables -A INPUT -s " + currentRule + " -j DROP";
-      system(command.c_str());
-    } else {
-      std::cout << "Blocking port: " << currentRule << std::endl;
-      std::string command =
-          "sudo iptables -A INPUT -p tcp --dport " + currentRule + " -j DROP";
-      system(command.c_str());
-    }
-  }
-  rulesFile.close();
-}
-
 // operators
 FirewallManager &FirewallManager::operator+(const std::string rule) {
   addRule(rule);
@@ -150,13 +131,37 @@ const char *FirewallManager::RuleDoNotExist::what() const throw() {
   return "Rule do not exist can't remove it;";
 }
 
+// execute
+void executeRules(const char *file_path) {
+  std::fstream rulesFile;
+  std::string currentRule;
+  rulesFile.open(file_path, std::ios::in);
+  if (!rulesFile.is_open()) {
+    std::cerr << "can't open rules.txt";
+  }
+  while (getline(rulesFile, currentRule)) {
+    if (currentRule.find('.') != std::string::npos) {
+      std::cout << "Blocking IP: " << currentRule << std::endl;
+      std::string command =
+          "sudo iptables -A INPUT -s " + currentRule + " -j DROP";
+      system(command.c_str());
+    } else {
+      std::cout << "Blocking port: " << currentRule << std::endl;
+      std::string command =
+          "sudo iptables -A INPUT -p tcp --dport " + currentRule + " -j DROP";
+      system(command.c_str());
+    }
+  }
+  rulesFile.close();
+}
+
 // undo the changes from the os
-void undoChanges(const std::string &rulesFile) {
-  std::ifstream file(rulesFile.c_str());
+void undoChanges(const char *file_path) {
+  std::ifstream file(file_path);
   std::string rule;
 
   if (!file.is_open()) {
-    std::cerr << "Error opening rules file: " << rulesFile << std::endl;
+    std::cerr << "Error opening rules file: " << file_path << std::endl;
     return;
   }
 

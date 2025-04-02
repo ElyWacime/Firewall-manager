@@ -9,11 +9,13 @@ class FirewallManager {
 private:
   std::vector<std::string> blockedIPs;
   std::vector<std::string> blockedPorts;
+  std::string rulesFilePath;
 
 public:
   // constractor
   FirewallManager();
   ~FirewallManager();
+  FirewallManager(std::string filePath);
   // configuration functions
   void addRule(std::string ip);
   void removeRule(std::string ip);
@@ -24,9 +26,6 @@ public:
   void loadRulesFromFile();
   void saveRulesToFile();
 
-  // execute
-  void executeRules() const;
-
   // overloading operator
   FirewallManager &operator+(const std::string rule);
   FirewallManager &operator-(const std::string rule);
@@ -34,6 +33,7 @@ public:
   // getters
   std::vector<std::string> getBlockedIPs() { return blockedIPs; }
   std::vector<std::string> getBlockedPorts() { return blockedPorts; }
+  std::string getFilePath() { return rulesFilePath; }
 
   class RuleAlreadyExists : public std::exception {
   public:
@@ -45,4 +45,7 @@ public:
   };
 };
 std::ostream &operator<<(std::ostream &out, const FirewallManager &obj);
-void undoChanges(const std::string &rulesFile);
+
+// execute
+void executeRules(const char *file_path);
+void undoChanges(const char *file_path);
